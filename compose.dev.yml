@@ -1,0 +1,60 @@
+version: '3'
+services:
+  db:
+    platform: linux/x86_64
+    container_name: candc_dev_mysql
+    image: mysql:${MYSQL_VERSION}
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=django
+      - MYSQL_ROOT_PASSWORD=temppassword
+    networks:
+      - internal-link
+
+  web:
+    container_name: candc_dev_web
+    build: web
+    image: candc_web
+    restart: always
+    environment:
+      - SECRET_KEY=tempstring
+      - LINE_TOKEN=tempstring
+      - DB_NAME=django
+      - DB_USER=root
+      - DB_PASSWORD=temppassword
+      - DB_HOST=db
+      - DB_PORT=3306
+    command:
+      sh -c "python3 /app/manage.py migrate && exec httpd-foreground"
+    volumes:
+      - type: bind
+        source: ${TLS_CERT_PATH}
+        target: /usr/local/apache2/conf/server.crt
+        read_only: true
+      - type: bind
+        source: ${TLS_KEY_PATH}
+        target: /usr/local/apache2/conf/server.key
+        read_only: true
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - db
+    networks:
+      - internal-link
+  tor:
+    container_name: candc_dev_tor
+    build: tor
+    image: candc_tor
+    restart: always
+    depends_on:
+      - web
+    networks:
+      - internal-link
+
+networks:
+  internal-link:
+    driver: bridge
+    name: internal_net

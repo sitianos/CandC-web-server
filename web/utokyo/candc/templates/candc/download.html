@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <body>
+    <h2>{{ path }}</h2>
+    <p>total size: {{ total_size|filesizeformat }}</p>
+    {% if message %}
+    <p>{{ message}}</p>
+    {% endif %}
+    <form action="." method="post">
+    {% csrf_token %}
+      <ul>
+	      {% if path != './' %}
+        <li>
+          <a href="..">../</a>
+        </li>
+        {% endif %}
+        <li>
+          <a href=".">./</a>
+        </li>
+        {% for dir in dir_list %}
+        <li>
+          <a href="{{ dir }}">{{ dir }}/</a>
+        </li>
+        {% endfor %}
+        {% for file in file_list %}
+        <li>
+          <input type="checkbox" name="delete" value="{{ file.name }}">
+          <a href="{{ file.name }}">{{ file.name }}</a> {{ file.time|date:"Y/m/d-H:i" }} {{ file.size|filesizeformat }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% if file_list %}
+      <input type="submit" value="Delete">
+      {% endif %}
+    </form>
+  </body>
+</html>

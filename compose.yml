@@ -1,0 +1,40 @@
+version: '3'
+services:
+  web:
+    container_name: candc_django
+    build: web
+    image: candc
+    restart: always
+    env_file:
+      - web.env
+    volumes:
+      - type: bind
+        source: ${TLS_CERT_PATH}
+        target: /usr/local/apache2/conf/server.crt
+        read_only: true
+      - type: bind
+        source: ${TLS_KEY_PATH}
+        target: /usr/local/apache2/conf/server.key
+        read_only: true
+      - ${MEDIA_PATH}:/app/media/
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - internal_net
+  tor:
+    container_name: candc_dev_tor
+    build: tor
+    image: candc_tor
+    restart: always
+    volumes:
+      - ${HIDDEN_SERVICE_DIR}:/var/lib/tor/hidden_service
+    depends_on:
+      - web
+    networks:
+      - internal_net
+
+networks:
+  internal_net:
+    driver: bridge
+    name: candc_net
