@@ -17,13 +17,14 @@ services:
         target: /usr/local/apache2/conf/server.key
         read_only: true
       - ${MEDIA_PATH}:/app/media/
+      - ${SQLITE_PATH}:/app/db.sqlite3
     ports:
       - 80:80
       - 443:443
     networks:
       - internal_net
   tor:
-    container_name: candc_dev_tor
+    container_name: candc_tor
     build: tor
     image: candc_tor
     restart: always
