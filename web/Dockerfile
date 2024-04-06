@@ -8,7 +8,7 @@ RUN ln -s $(mod_wsgi-express module-location) modules/mod_wsgi.so
 
 COPY conf/ conf/
 
-COPY --chown=www-data:www-data utokyo /app/
+COPY --chown=www-data:www-data iot /app/
 USER www-data:www-data
 RUN python3 /app/manage.py collectstatic
 USER root:root
